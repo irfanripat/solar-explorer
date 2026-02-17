@@ -17,6 +17,21 @@ export interface PlanetData {
     realDistance: string;
     description: string;
     funFact: string;
+
+    // Detailed Data
+    type: 'Star' | 'Planet' | 'Dwarf Planet' | 'Moon';
+    gravity: string;
+    surfaceArea: string;
+    composition: string;
+
+    // Visual Data
+    color: string;
+    distanceAU: number;
+    relativeRadius: number;
+
+    // Satellites & Missions
+    notableMoons?: string[];
+    artificialSatellites?: { name: string; type: string }[];
 }
 
 interface AppState {
@@ -31,6 +46,10 @@ interface AppState {
     // Scale Mode
     useRealScale: boolean;
     toggleRealScale: () => void;
+
+    // Easter Egg
+    showSpecialSun: boolean;
+    toggleSpecialSun: () => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -46,5 +65,8 @@ export const useStore = create<AppState>((set) => ({
     }),
     useRealScale: false,
     toggleRealScale: () => set((state) => ({ useRealScale: !state.useRealScale })),
+
+    showSpecialSun: false,
+    toggleSpecialSun: () => set((state) => ({ showSpecialSun: !state.showSpecialSun })),
 }));
 
