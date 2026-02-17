@@ -30,17 +30,26 @@ export default function BackgroundMusic() {
         const handleInteraction = () => {
             // Only try to play if currently paused
             if (audioRef.current && audioRef.current.paused) {
-                audioRef.current.play().catch(e => console.error("Interaction play failed", e));
-            }
+                const playPromise = audioRef.current.play();
 
-            // Remove listeners once we've attempted interaction play
-            ['click', 'keydown', 'touchstart'].forEach(event =>
-                window.removeEventListener(event, handleInteraction)
-            );
+                if (playPromise !== undefined) {
+                    playPromise
+                        .then(() => {
+                            // Success! Remove listeners now that audio is unlocked.
+                            ['click', 'keydown', 'touchstart'].forEach(event =>
+                                window.removeEventListener(event, handleInteraction)
+                            );
+                        })
+                        .catch(e => {
+                            console.log("Interaction play failed (probably not a user gesture yet):", e);
+                            // Do NOT remove listeners yet, try again on next interaction
+                        });
+                }
+            }
         };
 
         ['click', 'keydown', 'touchstart'].forEach(event =>
-            window.addEventListener(event, handleInteraction)
+            window.addEventListener(event, handleInteraction, { passive: true })
         );
 
         return () => {
