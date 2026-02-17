@@ -7,51 +7,56 @@ export default function BackgroundMusic() {
     const [isPlaying, setIsPlaying] = useState(false);
     const [volume, setVolume] = useState(0.5); // Default volume 50%
 
+    // Sync state with actual audio events (Source of Truth)
+    const handleOnPlay = () => setIsPlaying(true);
+    const handleOnPause = () => setIsPlaying(false);
+
     useEffect(() => {
         // Attempt to auto-play on mount
         const playAudio = async () => {
             if (audioRef.current) {
+                audioRef.current.volume = volume;
                 try {
-                    audioRef.current.volume = volume;
                     await audioRef.current.play();
-                    setIsPlaying(true);
                 } catch (err) {
                     console.log("Autoplay blocked, waiting for user interaction");
-                    // Keep isPlaying as false internally for the icon, but ready to play
                 }
             }
         };
 
         playAudio();
 
-        // Add global click listener to start audio if it hasn't started yet
+        // One-time global interaction listener to unlock audio if blocked
         const handleInteraction = () => {
+            // Only try to play if currently paused
             if (audioRef.current && audioRef.current.paused) {
-                audioRef.current.play()
-                    .then(() => setIsPlaying(true))
-                    .catch(e => console.error("Play failed", e));
+                audioRef.current.play().catch(e => console.error("Interaction play failed", e));
             }
+
+            // Remove listeners once we've attempted interaction play
+            ['click', 'keydown', 'touchstart'].forEach(event =>
+                window.removeEventListener(event, handleInteraction)
+            );
         };
 
-        window.addEventListener('click', handleInteraction);
-        window.addEventListener('keydown', handleInteraction);
-        window.addEventListener('touchstart', handleInteraction);
+        ['click', 'keydown', 'touchstart'].forEach(event =>
+            window.addEventListener(event, handleInteraction)
+        );
 
         return () => {
-            window.removeEventListener('click', handleInteraction);
-            window.removeEventListener('keydown', handleInteraction);
-            window.removeEventListener('touchstart', handleInteraction);
+            ['click', 'keydown', 'touchstart'].forEach(event =>
+                window.removeEventListener(event, handleInteraction)
+            );
         };
     }, []);
 
     const togglePlay = () => {
         if (audioRef.current) {
-            if (isPlaying) {
-                audioRef.current.pause();
-            } else {
+            if (audioRef.current.paused) {
                 audioRef.current.play();
+            } else {
+                audioRef.current.pause();
             }
-            setIsPlaying(!isPlaying);
         }
     };
 
@@ -63,6 +68,9 @@ export default function BackgroundMusic() {
                 src="/music/interstellar.mp3"
                 loop
                 preload="auto"
+                autoPlay
+                onPlay={handleOnPlay}
+                onPause={handleOnPause}
             />
 
             {/* Mute/Unmute Control - Top Right (Below Scale/Back buttons) */}
