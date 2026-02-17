@@ -82,10 +82,10 @@ export default function BackgroundMusic() {
             />
 
             {/* Mute/Unmute Control - Top Right (Below Scale/Back buttons) */}
-            <div className="fixed top-20 right-4 z-50 md:top-28 md:right-10">
+            <div className="fixed top-20 right-4 z-[100] md:top-28 md:right-10 pointer-events-none">
                 <button
                     onClick={togglePlay}
-                    className="bg-black/40 backdrop-blur-md hover:bg-white/10 text-white/50 hover:text-white p-3 rounded-full transition-all border border-white/10 group"
+                    className="pointer-events-auto bg-black/40 backdrop-blur-md hover:bg-white/10 text-white/50 hover:text-white p-3 rounded-full transition-all border border-white/10 group active:scale-95 touch-manipulation"
                     aria-label={isPlaying ? "Mute Music" : "Play Music"}
                 >
                     {isPlaying ? (
