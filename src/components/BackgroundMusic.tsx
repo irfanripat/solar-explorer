@@ -68,7 +68,6 @@ export default function BackgroundMusic() {
                 src="/music/interstellar.mp3"
                 loop
                 preload="auto"
-                autoPlay
                 onPlay={handleOnPlay}
                 onPause={handleOnPause}
             />
