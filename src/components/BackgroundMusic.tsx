@@ -5,79 +5,46 @@ import { useState, useEffect, useRef } from 'react';
 export default function BackgroundMusic() {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [volume, setVolume] = useState(0.5); // Default volume 50%
 
     // Sync state with actual audio events (Source of Truth)
     const handleOnPlay = () => setIsPlaying(true);
     const handleOnPause = () => setIsPlaying(false);
 
     useEffect(() => {
-        // Attempt to auto-play on mount
-        const playAudio = async () => {
-            if (audioRef.current) {
-                audioRef.current.volume = volume;
-                try {
-                    await audioRef.current.play();
-                } catch (err) {
-                    console.log("Autoplay blocked, waiting for user interaction");
-                }
-            }
-        };
-
-        playAudio();
-
-        // One-time global interaction listener to unlock audio if blocked
-        const handleInteraction = () => {
-            // Only try to play if currently paused
-            if (audioRef.current && audioRef.current.paused) {
-                const playPromise = audioRef.current.play();
-
-                if (playPromise !== undefined) {
-                    playPromise
-                        .then(() => {
-                            // Success! Remove listeners now that audio is unlocked.
-                            ['click', 'keydown', 'touchstart'].forEach(event =>
-                                window.removeEventListener(event, handleInteraction)
-                            );
-                        })
-                        .catch(e => {
-                            console.log("Interaction play failed (probably not a user gesture yet):", e);
-                            // Do NOT remove listeners yet, try again on next interaction
-                        });
-                }
-            }
-        };
-
-        ['click', 'keydown', 'touchstart'].forEach(event =>
-            window.addEventListener(event, handleInteraction, { passive: true })
-        );
-
-        return () => {
-            ['click', 'keydown', 'touchstart'].forEach(event =>
-                window.removeEventListener(event, handleInteraction)
-            );
-        };
+        // Force load on mount to ensure readiness
+        if (audioRef.current) {
+            audioRef.current.load();
+        }
     }, []);
 
-    const togglePlay = () => {
-        if (audioRef.current) {
-            if (audioRef.current.paused) {
-                audioRef.current.play().catch(e => console.error("Toggle play failed", e));
+    const togglePlay = async () => {
+        const audio = audioRef.current;
+        if (!audio) return;
+
+        try {
+            if (audio.paused) {
+                // On iOS, we must call play() directly within the handler
+                await audio.play();
             } else {
-                audioRef.current.pause();
+                audio.pause();
             }
+        } catch (error) {
+            console.error("Playback failed:", error);
+            // If it failed, it might need a reload or it's a restriction
+            // We could try: audio.load() then audio.play(), but let's stick to simple first
         }
     };
 
     return (
         <>
             {/* Hidden Audio Element */}
+            {/* playsInline is critical for iOS to not force fullscreen */}
             <audio
                 ref={audioRef}
                 src="/music/interstellar.mp3"
                 loop
-                preload="auto"
                 playsInline
+                preload="auto"
                 onPlay={handleOnPlay}
                 onPause={handleOnPause}
             />
@@ -86,7 +53,7 @@ export default function BackgroundMusic() {
             <div className="fixed top-24 right-4 z-[100] md:top-28 md:right-10 pointer-events-none">
                 <button
                     onClick={togglePlay}
-                    className="pointer-events-auto bg-black/40 backdrop-blur-md hover:bg-white/10 text-white/50 hover:text-white p-3 rounded-full transition-all border border-white/10 group active:scale-95 touch-manipulation"
+                    className="pointer-events-auto bg-black/40 backdrop-blur-md hover:bg-white/10 text-white/50 hover:text-white p-3 rounded-full transition-all border border-white/10 group active:scale-95 touch-manipulation shadow-lg"
                     aria-label={isPlaying ? "Mute Music" : "Play Music"}
                 >
                     {isPlaying ? (
