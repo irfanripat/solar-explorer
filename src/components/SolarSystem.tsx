@@ -33,8 +33,14 @@ export default function SolarSystem() {
                        Camera Headlight (in CameraController): Provides the main "studio" light from user's angle.
                        Rim Light: Added here for a bit of 3D depth from fixed angle
                     */}
-                    <ambientLight intensity={0.2} />
-                    <directionalLight position={[-10, 5, -5]} intensity={0.5} color="#aaaaff" />
+                    {/* 
+                       Base Ambient Light: Increased to 0.5 for better visibility.
+                       Hemisphere Light: Adds soft fill from above/below to reveal details.
+                       Directional Light: Key light from the "Sun" direction.
+                    */}
+                    <ambientLight intensity={0.5} />
+                    <hemisphereLight intensity={0.6} groundColor="#000000" />
+                    <directionalLight position={[-10, 5, -5]} intensity={1.5} color="#ffffff" />
                 </>
             )}
 
