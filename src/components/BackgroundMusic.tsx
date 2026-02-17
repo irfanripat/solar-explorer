@@ -62,7 +62,7 @@ export default function BackgroundMusic() {
     const togglePlay = () => {
         if (audioRef.current) {
             if (audioRef.current.paused) {
-                audioRef.current.play();
+                audioRef.current.play().catch(e => console.error("Toggle play failed", e));
             } else {
                 audioRef.current.pause();
             }
@@ -77,12 +77,13 @@ export default function BackgroundMusic() {
                 src="/music/interstellar.mp3"
                 loop
                 preload="auto"
+                playsInline
                 onPlay={handleOnPlay}
                 onPause={handleOnPause}
             />
 
             {/* Mute/Unmute Control - Top Right (Below Scale/Back buttons) */}
-            <div className="fixed top-20 right-4 z-[100] md:top-28 md:right-10 pointer-events-none">
+            <div className="fixed top-24 right-4 z-[100] md:top-28 md:right-10 pointer-events-none">
                 <button
                     onClick={togglePlay}
                     className="pointer-events-auto bg-black/40 backdrop-blur-md hover:bg-white/10 text-white/50 hover:text-white p-3 rounded-full transition-all border border-white/10 group active:scale-95 touch-manipulation"
