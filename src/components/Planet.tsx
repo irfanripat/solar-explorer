@@ -59,7 +59,8 @@ export default function Planet({ data, rotationSpeed = 0.01 }: PlanetProps) {
 
         if (orbitRef.current && !isSelected) {
             // Orbital movement - Pause if selected
-            orbitRef.current.rotation.y += speed * delta;
+            // Speed up by 20x so users can actually see them move!
+            orbitRef.current.rotation.y += speed * delta * 20;
         }
         if (meshRef.current) {
             // Self rotation - Always rotate
